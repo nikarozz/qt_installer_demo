@@ -1,0 +1,17 @@
+
+<RCC>
+    <!--
+      ВНИМАНИЕ: в каталоге resources должны существовать файлы:
+        - postgresql.deb
+        - slapd.deb
+        - wine.deb
+
+      Это могут быть реальные .deb пакеты или небольшие тестовые .deb.
+      Без этих файлов сборка проекта завершится с ошибкой.
+    -->
+    <qresource prefix="/packages">
+        <file>postgresql.deb</file>
+        <file>slapd.deb</file>
+        <file>wine.deb</file>
+    </qresource>
+</RCC>

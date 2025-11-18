@@ -1,0 +1,29 @@
+### Build directories
+build/
+build-*/
+cmake-build-*/
+
+### CMake artifacts
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Testing/
+CTestTestfile.cmake
+cmake_install.cmake
+install_manifest.txt
+
+### Qt Creator user data
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.creator.user
+*.creator.user.*
+
+### Qt-generated files (AUTOMOC/AUTORCC outputs)
+moc_*.cpp
+mocs_compilation.cpp
+ui_*.h
+qrc_*.cpp
+
+
