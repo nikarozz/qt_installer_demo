@@ -3,7 +3,11 @@
 #include <QWidget>
 
 class QLabel;
-
+/**
+ * @brief Стартовый экран мастера установки.
+ *
+ * Отображает имя кандидата и приветственный текст.
+ */
 class IntroWidget : public QWidget
 {
     Q_OBJECT

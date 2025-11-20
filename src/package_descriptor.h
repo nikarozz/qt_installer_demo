@@ -9,6 +9,12 @@ enum class PackageType {
     // Rpm
 };
 
+/**
+ * @brief Описание устанавливаемого пакета.
+ *
+ * Хранит идентификатор, отображаемое имя, описание и
+ * список путей к .deb-файлам в ресурсах Qt.
+ */
 struct PackageDescriptor {
     QString id;
     QString displayName;

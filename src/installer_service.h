@@ -9,6 +9,14 @@
 
 using ResourceExtractorFunc = std::function<QString(const QString&, QString*)>;
 
+/**
+ * @brief Сервис установки пакетов.
+ *
+ * Отвечает за:
+ *  - извлечение .deb-файлов из ресурсов;
+ *  - последовательный запуск dpkg для каждого файла;
+ *  - эмит сигналов о ходе и результате установки.
+ */
 class InstallerService : public QObject
 {
     Q_OBJECT

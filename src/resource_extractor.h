@@ -2,6 +2,9 @@
 
 #include <QString>
 
+/**
+ * @brief Извлекает ресурс во временный файл.
+ */
 class ResourceExtractor
 {
 public:

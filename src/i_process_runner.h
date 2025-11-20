@@ -3,6 +3,9 @@
 #include <QString>
 #include <QStringList>
 
+/**
+ * @brief Результат выполнения внешнего процесса.
+ */
 struct ProcessResult {
     int exitCode = -1;
     QString stdOut;
@@ -10,6 +13,12 @@ struct ProcessResult {
     bool failedToStart = false;
 };
 
+/**
+ * @brief Интерфейс абстракции над запуском внешних процессов.
+ *
+ * Позволяет подменять реализацию при
+ * сохранении общей логики в InstallerService.
+ */
 class IProcessRunner
 {
 public:

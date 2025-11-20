@@ -9,6 +9,14 @@
 class QComboBox;
 class QLabel;
 
+/**
+ * @brief Экран выбора пакета и отображения хода установки.
+ *
+ * Содержит:
+ *  - выпадающий список доступных пакетов;
+ *  - окно логов установки;
+ *  - индикатор прогресса.
+ */
 class PackageSelectionWidget : public QWidget
 {
     Q_OBJECT

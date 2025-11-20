@@ -1,11 +1,17 @@
 #pragma once
 
+/**
+ * @brief Состояния шага мастера установки.
+ */
 enum class WizardState {
     Intro,
     SelectPackage,
     // Outro,
 };
 
+/**
+ * @brief Класс для навигации между шагами мастера.
+ */
 class WizardNavigation
 {
 public:

@@ -12,6 +12,13 @@ class InstallerService;
 class QPushButton;
 class QStackedWidget;
 
+/**
+ * @brief Главное окно мастера установки.
+ *
+ * Управляет навигацией между шагами мастера (Intro / SelectPackage),
+ * отображает соответствующие страницы и обрабатывает сигналы от службы
+ * установки пакетов.
+ */
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
