@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/packages">
+        <file>greetings.deb</file>
+        <file>sl_5.02-1_amd64.deb</file>
+    </qresource>
+    <qresource prefix="/packages/slapd"/>
+</RCC>

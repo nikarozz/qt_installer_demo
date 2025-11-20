@@ -5,6 +5,6 @@
 class ResourceExtractor
 {
 public:
-    static QString extractResourceToTempFile(const QString& resourcePath,
+    static QString extractResourceToTempFile(const QString& resourcePaths,
                                              QString* errorMessage = nullptr);
 };

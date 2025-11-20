@@ -1,18 +1,19 @@
 #pragma once
 
 #include <QString>
+#include <QStringList>
 #include <QMetaType>
 
 enum class PackageType {
     Deb,
-    Rpm
+    // Rpm
 };
 
 struct PackageDescriptor {
     QString id;
     QString displayName;
     QString description;
-    QString resourcePath;
+    QStringList resourcePaths;
     PackageType type;
 };
 

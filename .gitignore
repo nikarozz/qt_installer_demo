@@ -11,6 +11,7 @@ Testing/
 CTestTestfile.cmake
 cmake_install.cmake
 install_manifest.txt
+CMakeLists.txt.user
 
 ### Qt Creator user data
 *.pro.user

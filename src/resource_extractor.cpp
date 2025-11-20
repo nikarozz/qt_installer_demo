@@ -5,13 +5,13 @@
 #include <QDir>
 #include <QDebug>
 
-QString ResourceExtractor::extractResourceToTempFile(const QString& resourcePath,
+QString ResourceExtractor::extractResourceToTempFile(const QString& resourcePaths,
                                                      QString* errorMessage)
 {
-    QFile inFile(resourcePath);
+    QFile inFile(resourcePaths);
     if (!inFile.exists()) {
         if (errorMessage) {
-            *errorMessage = QStringLiteral("Ресурс не найден: %1").arg(resourcePath);
+            *errorMessage = QStringLiteral("Ресурс не найден: %1").arg(resourcePaths);
         }
         return {};
     }
@@ -44,6 +44,6 @@ QString ResourceExtractor::extractResourceToTempFile(const QString& resourcePath
     QString path = tempFile.fileName();
     tempFile.close();
 
-    qDebug() << "Ресурс" << resourcePath << "извлечён во временный файл" << path;
+    qDebug() << "Ресурс" << resourcePaths << "извлечён во временный файл" << path;
     return path;
 }

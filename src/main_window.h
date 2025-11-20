@@ -26,6 +26,7 @@ private slots:
     void onInstallationStarted(const PackageDescriptor& pkg);
     void onInstallationFinished(const PackageDescriptor& pkg, bool success, const QString& errorMessage);
     void onInstallationOutput(const QString& line);
+    //void onDependencyProblemsDetected(const PackageDescriptor& pkg, const QString& details);
 
 private:
     void setupUi();
@@ -42,5 +43,5 @@ private:
 
     std::vector<PackageDescriptor> m_packages_;
     InstallerService* m_installer_;
-    bool m_install_in_progress = false;
+    bool m_install_in_progress_ = false;
 };

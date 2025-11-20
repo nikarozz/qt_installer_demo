@@ -39,6 +39,9 @@ MainWindow::MainWindow(QWidget* parent)
             this, &MainWindow::onInstallationFinished);
     connect(m_installer_, &InstallerService::installationOutput,
             this, &MainWindow::onInstallationOutput);
+    //connect(m_installer_, &InstallerService::dependencyProblemsDetected,
+    //        this, &MainWindow::onDependencyProblemsDetected);
+
 
     updateUiForState();
 }
@@ -90,7 +93,7 @@ void MainWindow::updateUiForState()
 
 void MainWindow::onBackClicked()
 {
-    if (m_install_in_progress)
+    if (m_install_in_progress_)
         return;
 
     m_state_ = WizardNavigation::back(m_state_);
@@ -99,7 +102,7 @@ void MainWindow::onBackClicked()
 
 void MainWindow::onNextClicked()
 {
-    if (m_install_in_progress)
+    if (m_install_in_progress_)
         return;
 
     if (m_state_ == WizardState::Intro) {
@@ -118,7 +121,7 @@ void MainWindow::onNextClicked()
 
         auto pkg = currentSelectedPackage();
         setButtonsEnabled(false);
-        m_install_in_progress = true;
+        m_install_in_progress_ = true;
         m_installer_->installPackage(pkg);
     }
 }
@@ -146,7 +149,7 @@ void MainWindow::onInstallationStarted(const PackageDescriptor& pkg)
 void MainWindow::onInstallationFinished(const PackageDescriptor& pkg, bool success, const QString& errorMessage)
 {
     Q_UNUSED(pkg);
-    m_install_in_progress = false;
+    m_install_in_progress_ = false;
     setButtonsEnabled(true);
 
     if (success) {
@@ -163,3 +166,34 @@ void MainWindow::onInstallationOutput(const QString& line)
 {
     qDebug() << "OUTPUT:" << line;
 }
+
+/*void MainWindow::onDependencyProblemsDetected(const PackageDescriptor& pkg, const QString& details)
+{
+    m_install_in_progress_ = false;
+    setButtonsEnabled(true);
+
+    const QString text =
+        QStringLiteral("При установке пакета '%1' обнаружены проблемы с зависимостями.\n\n"
+                       "Сообщение dpkg:\n%2\n\n"
+                       "Запустить 'apt-get -f install' для попытки автоматической установки "
+                       "недостающих зависимостей?")
+            .arg(pkg.displayName, details);
+
+    auto reply = QMessageBox::question(this,
+                                       QStringLiteral("Проблемы с зависимостями"),
+                                       text,
+                                       QMessageBox::Yes | QMessageBox::No,
+                                       QMessageBox::Yes);
+
+    if (reply == QMessageBox::Yes) {
+        m_install_in_progress_ = true;
+        setButtonsEnabled(false);
+        //m_installer_->fixDependencies(pkg);
+    } else {
+        QMessageBox::warning(this,
+                             QStringLiteral("Установка прервана"),
+                             QStringLiteral("Установка пакета '%1' прервана из-за "
+                                            "неудовлетворённых зависимостей.")
+                                 .arg(pkg.displayName));
+    }
+}*/
