@@ -20,6 +20,7 @@ cmake --build build
 ## Запуск
 
 ```bash
+cd build
 sudo ./installer_app
 ```
 
@@ -27,5 +28,10 @@ sudo ./installer_app
 
 ```bash
 ctest --test-dir build --verbose
+```
+## Документация
+
+```bash
+doxygen Doxyfile
 ```
 
