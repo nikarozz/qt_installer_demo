@@ -31,11 +31,15 @@ void InstallerService::installPackage(const PackageDescriptor& pkg)
     const auto files = pkg.resourcePaths;
     const int total = files.size();
     if (total == 0) {
-        emit installationFinished(pkg, false, QStringLiteral("Нет файлов для установки"));
+        const QString msg = QStringLiteral("Нет файлов для установки для пакета '%1'")
+                                .arg(pkg.displayName);
+        emit installationFinished(pkg, false, msg);
+        return;
     }
 
     int step = 100 / total;
-    if (step <= 0) step = 1;
+    if (step <= 0)
+        step = 1;
 
     int currentPercent = 0;
     emit installationProgress(pkg, currentPercent);
@@ -47,9 +51,12 @@ void InstallerService::installPackage(const PackageDescriptor& pkg)
         const QString tempFile = m_resource_extractor_(resPath, &error);
         if (tempFile.isEmpty()) {
             emit installationOutput(
-                QStringLiteral("Не удалось извлечь ресурс: %1").arg(resPath));
-            emit installationFinished(pkg, false,
-                                      QStringLiteral("Ошибка извлечения ресурса %1").arg(resPath));
+                QStringLiteral("Не удалось извлечь ресурс: %1 (%2)")
+                    .arg(resPath, error));
+            const QString msg =
+                QStringLiteral("Ошибка извлечения ресурса %1: %2").arg(resPath, error);
+            emit installationFinished(pkg, false, msg);
+            return;
         }
 
         emit installationOutput(
@@ -67,16 +74,29 @@ void InstallerService::installPackage(const PackageDescriptor& pkg)
         if (!result.stdErr.isEmpty())
             emit installationOutput(result.stdErr);
 
+        if (result.failedToStart) {
+            const QString msg =
+                QStringLiteral("Не удалось запустить dpkg для файла %1: %2")
+                    .arg(tempFile, result.stdErr);
+            emit installationFinished(pkg, false, msg);
+            return;
+        }
+
         if (result.exitCode != 0) {
-            emit installationFinished(pkg, false,
-                                      QStringLiteral("dpkg завершился с кодом %1").arg(result.exitCode));
+            const QString msg =
+                QStringLiteral("dpkg завершился с кодом %1 при установке %2")
+                    .arg(result.exitCode)
+                    .arg(tempFile);
+            emit installationFinished(pkg, false, msg);
+            return;
         }
 
         if (i == total - 1) {
             currentPercent = 100;
         } else {
             currentPercent += step;
-            if (currentPercent > 99 && i != total - 1) currentPercent = 99;
+            if (currentPercent > 99)
+                currentPercent = 99;
         }
 
         emit installationProgress(pkg, currentPercent);
@@ -84,3 +104,4 @@ void InstallerService::installPackage(const PackageDescriptor& pkg)
 
     emit installationFinished(pkg, true, QString());
 }
+

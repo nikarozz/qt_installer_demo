@@ -25,20 +25,20 @@ IntroWidget::IntroWidget(QWidget* parent)
     rightLayout->setContentsMargins(40, 40, 40, 40);
     rightLayout->setSpacing(16);
 
-    auto* titleLabel = new QLabel(tr("Александр Ермаков"), rightPane);
+    auto* titleLabel = new QLabel(tr("Александр\nЕрмаков"), rightPane);
     QFont titleFont = titleLabel->font();
-    titleFont.setPointSize(28);
+    titleFont.setPointSize(45);
     titleFont.setBold(true);
     titleLabel->setFont(titleFont);
     titleLabel->setStyleSheet("color: #13a538;");
 
     auto* subtitleLabel = new QLabel(
-        tr("Добро пожаловать в мастер установки - демопроект для REGLAB.\n"
+        tr("Добро пожаловать в мастер установки!\n"
            "Чтобы продолжить, нажмите кнопку \"Далее\"."),
         rightPane);
     subtitleLabel->setWordWrap(true);
     QFont subtitleFont = subtitleLabel->font();
-    subtitleFont.setPointSize(12);
+    subtitleFont.setPointSize(18);
     subtitleLabel->setFont(subtitleFont);
     subtitleLabel->setStyleSheet("color: white;");
 
