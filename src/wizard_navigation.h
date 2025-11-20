@@ -3,7 +3,6 @@
 enum class WizardState {
     Intro,
     SelectPackage,
-    // Installation,
     // Outro,
 };
 

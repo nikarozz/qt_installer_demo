@@ -39,9 +39,6 @@ MainWindow::MainWindow(QWidget* parent)
             this, &MainWindow::onInstallationFinished);
     connect(m_installer_, &InstallerService::installationOutput,
             this, &MainWindow::onInstallationOutput);
-    //connect(m_installer_, &InstallerService::dependencyProblemsDetected,
-    //        this, &MainWindow::onDependencyProblemsDetected);
-
 
     updateUiForState();
 }
@@ -166,34 +163,3 @@ void MainWindow::onInstallationOutput(const QString& line)
 {
     qDebug() << "OUTPUT:" << line;
 }
-
-/*void MainWindow::onDependencyProblemsDetected(const PackageDescriptor& pkg, const QString& details)
-{
-    m_install_in_progress_ = false;
-    setButtonsEnabled(true);
-
-    const QString text =
-        QStringLiteral("При установке пакета '%1' обнаружены проблемы с зависимостями.\n\n"
-                       "Сообщение dpkg:\n%2\n\n"
-                       "Запустить 'apt-get -f install' для попытки автоматической установки "
-                       "недостающих зависимостей?")
-            .arg(pkg.displayName, details);
-
-    auto reply = QMessageBox::question(this,
-                                       QStringLiteral("Проблемы с зависимостями"),
-                                       text,
-                                       QMessageBox::Yes | QMessageBox::No,
-                                       QMessageBox::Yes);
-
-    if (reply == QMessageBox::Yes) {
-        m_install_in_progress_ = true;
-        setButtonsEnabled(false);
-        //m_installer_->fixDependencies(pkg);
-    } else {
-        QMessageBox::warning(this,
-                             QStringLiteral("Установка прервана"),
-                             QStringLiteral("Установка пакета '%1' прервана из-за "
-                                            "неудовлетворённых зависимостей.")
-                                 .arg(pkg.displayName));
-    }
-}*/

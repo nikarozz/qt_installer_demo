@@ -18,13 +18,11 @@ public:
                               ResourceExtractorFunc resourceExtractor = ResourceExtractorFunc());
 
     void installPackage(const PackageDescriptor& pkg);
-    //void fixDependencies(const PackageDescriptor& pkg);
 
 signals:
     void installationStarted(const PackageDescriptor& pkg);
     void installationFinished(const PackageDescriptor& pkg, bool success, const QString& errorMessage);
     void installationOutput(const QString& line);   
-    // dependencyProblemsDetected(const PackageDescriptor& pkg, const QString& details);
 
 private:
     std::unique_ptr<IProcessRunner> m_process_runner_;

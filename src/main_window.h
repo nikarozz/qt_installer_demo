@@ -26,7 +26,6 @@ private slots:
     void onInstallationStarted(const PackageDescriptor& pkg);
     void onInstallationFinished(const PackageDescriptor& pkg, bool success, const QString& errorMessage);
     void onInstallationOutput(const QString& line);
-    //void onDependencyProblemsDetected(const PackageDescriptor& pkg, const QString& details);
 
 private:
     void setupUi();
