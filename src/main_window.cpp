@@ -47,6 +47,8 @@ MainWindow::MainWindow(QWidget* parent)
             this, &MainWindow::onInstallationFinished);
     connect(m_installer_, &InstallerService::installationOutput,
             this, &MainWindow::onInstallationOutput);
+    connect(m_installer_, &InstallerService::installationProgress,
+            this, &MainWindow::onInstallationProgress);
 
     updateUiForState();
 }
@@ -194,7 +196,6 @@ void MainWindow::onInstallationStarted(const PackageDescriptor& pkg)
     m_install_in_progress_ = true;
     setButtonsEnabled(false);
 
-    // Лог + прогресс на экране выбора пакета
     if (m_selection_widget_) {
         m_selection_widget_->clearLog();
         m_selection_widget_->setProgressValue(0);
@@ -234,5 +235,13 @@ void MainWindow::onInstallationOutput(const QString& line)
     qDebug() << "OUTPUT:" << line;
     if (m_selection_widget_) {
         m_selection_widget_->appendLogLine(line);
+    }
+}
+
+void MainWindow::onInstallationProgress(const PackageDescriptor& pkg, int percent)
+{
+    Q_UNUSED(pkg);
+    if (m_selection_widget_) {
+        m_selection_widget_->setProgressValue(percent);
     }
 }

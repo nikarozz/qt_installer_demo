@@ -22,7 +22,8 @@ public:
 signals:
     void installationStarted(const PackageDescriptor& pkg);
     void installationFinished(const PackageDescriptor& pkg, bool success, const QString& errorMessage);
-    void installationOutput(const QString& line);   
+    void installationOutput(const QString& line);
+    void installationProgress(const PackageDescriptor& pkg, int percent);
 
 private:
     std::unique_ptr<IProcessRunner> m_process_runner_;

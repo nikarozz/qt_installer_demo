@@ -1,7 +1,8 @@
-### Build directories
+### directories
 build/
 build-*/
 cmake-build-*/
+docs/
 
 ### CMake artifacts
 CMakeCache.txt

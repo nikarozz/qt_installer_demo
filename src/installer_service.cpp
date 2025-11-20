@@ -26,61 +26,60 @@ InstallerService::InstallerService(QObject* parent,
 
 void InstallerService::installPackage(const PackageDescriptor& pkg)
 {
-    qDebug() << "Запуск установки пакета:" << pkg.id;
     emit installationStarted(pkg);
 
-    if (pkg.resourcePaths.isEmpty()) {
-        const QString msg = QStringLiteral("У пакета '%1' не указаны файлы ресурсов.").arg(pkg.id);
-        qWarning() << msg;
-        emit installationFinished(pkg, false, msg);
-        return;
+    const auto files = pkg.resourcePaths;
+    const int total = files.size();
+    if (total == 0) {
+        emit installationFinished(pkg, false, QStringLiteral("Нет файлов для установки"));
     }
 
-    QStringList tempFiles;
-    tempFiles.reserve(pkg.resourcePaths.size());
+    int step = 100 / total;
+    if (step <= 0) step = 1;
 
-    for (const QString& resPath : pkg.resourcePaths) {
+    int currentPercent = 0;
+    emit installationProgress(pkg, currentPercent);
+
+    for (int i = 0; i < total; ++i) {
+        const QString& resPath = files.at(i);
+
         QString error;
-        const QString tempFilePath = m_resource_extractor_(resPath, &error);
-        if (tempFilePath.isEmpty()) {
-            const QString msg = QStringLiteral("Не удалось извлечь пакет '%1' из ресурса %2: %3")
-                                    .arg(pkg.id, resPath, error);
-            qWarning() << msg;
-            emit installationFinished(pkg, false, msg);
-            return;
+        const QString tempFile = m_resource_extractor_(resPath, &error);
+        if (tempFile.isEmpty()) {
+            emit installationOutput(
+                QStringLiteral("Не удалось извлечь ресурс: %1").arg(resPath));
+            emit installationFinished(pkg, false,
+                                      QStringLiteral("Ошибка извлечения ресурса %1").arg(resPath));
         }
-        qDebug() << "Ресурс" << resPath << "извлечён во временный файл" << tempFilePath;
-        tempFiles << tempFilePath;
-    }
 
-    QString program = QStringLiteral("env");
-    QStringList args;
-    args << QStringLiteral("DEBIAN_FRONTEND=noninteractive");
-    args << QStringLiteral("dpkg");
-    args << QStringLiteral("-i");
-    args << tempFiles;
+        emit installationOutput(
+            QStringLiteral("Установка файла %1 (%2 из %3)...")
+                .arg(resPath)
+                .arg(i + 1)
+                .arg(total));
 
-    ProcessResult res = m_process_runner_->run(program, args);
+        auto result = m_process_runner_->run(
+            QStringLiteral("dpkg"),
+            QStringList() << "-i" << tempFile);
 
-    if (!res.stdOut.isEmpty())
-        emit installationOutput(res.stdOut);
-    if (!res.stdErr.isEmpty())
-        emit installationOutput(res.stdErr);
+        if (!result.stdOut.isEmpty())
+            emit installationOutput(result.stdOut);
+        if (!result.stdErr.isEmpty())
+            emit installationOutput(result.stdErr);
 
-    if (res.failedToStart) {
-        const QString msg = QStringLiteral("Не удалось запустить dpkg: %1").arg(res.stdErr);
-        qWarning() << msg;
-        emit installationFinished(pkg, false, msg);
-        return;
-    }
+        if (result.exitCode != 0) {
+            emit installationFinished(pkg, false,
+                                      QStringLiteral("dpkg завершился с кодом %1").arg(result.exitCode));
+        }
 
-    if (res.exitCode != 0) {
-        const QString msg = QStringLiteral("dpkg завершился с кодом %1: %2")
-                                .arg(res.exitCode)
-                                .arg(res.stdErr);
-        qWarning() << msg;
-        emit installationFinished(pkg, false, msg);
-        return;
+        if (i == total - 1) {
+            currentPercent = 100;
+        } else {
+            currentPercent += step;
+            if (currentPercent > 99 && i != total - 1) currentPercent = 99;
+        }
+
+        emit installationProgress(pkg, currentPercent);
     }
 
     emit installationFinished(pkg, true, QString());
