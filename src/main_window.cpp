@@ -18,20 +18,28 @@ MainWindow::MainWindow(QWidget* parent)
     , m_intro_widget_(new IntroWidget(this))
     , m_selection_widget_(new PackageSelectionWidget(this))
     , m_stack_(new QStackedWidget(this))
-    , m_back_button_(new QPushButton(QStringLiteral("Назад"), this))
-    , m_next_button_(new QPushButton(QStringLiteral("Далее"), this))
+    , m_back_button_(new QPushButton(tr("Назад"), this))
+    , m_next_button_(new QPushButton(tr("Далее"), this))
+    , m_cancel_button_(new QPushButton(tr("Отмена"), this))
+    , m_finish_button_(new QPushButton(tr("Завершить"), this))
+    , m_install_button_(new QPushButton(tr("Установить"), this))
     , m_installer_(new InstallerService(this))
 {
     m_packages_ = PackageRepository::availablePackages();
+    m_selection_widget_->setPackages(m_packages_);
 
     setupUi();
-
-    m_selection_widget_->setPackages(m_packages_);
 
     connect(m_back_button_, &QPushButton::clicked,
             this, &MainWindow::onBackClicked);
     connect(m_next_button_, &QPushButton::clicked,
             this, &MainWindow::onNextClicked);
+    connect(m_install_button_, &QPushButton::clicked,
+            this, &MainWindow::onNextClicked);
+    connect(m_cancel_button_, &QPushButton::clicked,
+            this, &MainWindow::close);
+    connect(m_finish_button_, &QPushButton::clicked,
+            this, &MainWindow::close);
 
     connect(m_installer_, &InstallerService::installationStarted,
             this, &MainWindow::onInstallationStarted);
@@ -51,21 +59,42 @@ void MainWindow::setupUi()
     setCentralWidget(central);
 
     auto* mainLayout = new QVBoxLayout(central);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
 
-    m_stack_->addWidget(m_intro_widget_);       // index 0
-    m_stack_->addWidget(m_selection_widget_);   // index 1
+    mainLayout->addWidget(m_stack_, 1);
 
-    mainLayout->addWidget(m_stack_);
+    auto* buttonsPanel = new QWidget(central);
+    auto* buttonsLayout = new QHBoxLayout(buttonsPanel);
+    buttonsLayout->setContentsMargins(12, 8, 12, 8);
+    buttonsLayout->setSpacing(8);
 
-    auto* buttonLayout = new QHBoxLayout();
-    buttonLayout->addStretch();
-    buttonLayout->addWidget(m_back_button_);
-    buttonLayout->addWidget(m_next_button_);
+    auto* leftButtons = new QHBoxLayout();
+    auto* rightButtons = new QHBoxLayout();
+    leftButtons->setSpacing(8);
+    rightButtons->setSpacing(8);
 
-    mainLayout->addLayout(buttonLayout);
+    leftButtons->addWidget(m_cancel_button_);
+    leftButtons->addWidget(m_back_button_);
+    leftButtons->addStretch();
 
-    setWindowTitle(QStringLiteral("Demo Installer"));
-    resize(500, 300);
+    rightButtons->addStretch();
+    rightButtons->addWidget(m_install_button_);
+    rightButtons->addWidget(m_finish_button_);
+    rightButtons->addWidget(m_next_button_);
+
+    buttonsLayout->addLayout(leftButtons);
+    buttonsLayout->addLayout(rightButtons);
+
+    mainLayout->addWidget(buttonsPanel, 0);
+
+    resize(900, 600);
+    setMinimumSize(800, 500);
+
+    m_stack_->addWidget(m_intro_widget_);
+    m_stack_->addWidget(m_selection_widget_);
+
+    m_state_ = WizardState::Intro;
 }
 
 void MainWindow::updateUiForState()
@@ -73,17 +102,37 @@ void MainWindow::updateUiForState()
     switch (m_state_) {
     case WizardState::Intro:
         m_stack_->setCurrentWidget(m_intro_widget_);
-        m_back_button_->setEnabled(false);
+        m_cancel_button_->setVisible(true);
+        m_cancel_button_->setEnabled(true);
+
         m_back_button_->setVisible(false);
-        m_next_button_->setText(QStringLiteral("Далее"));
-        m_next_button_->setEnabled(WizardNavigation::canGoNext(m_state_));
+
+        m_next_button_->setVisible(true);
+        m_next_button_->setEnabled(true);
+
+        m_install_button_->setVisible(false);
+        m_finish_button_->setVisible(false);
         break;
     case WizardState::SelectPackage:
         m_stack_->setCurrentWidget(m_selection_widget_);
+        m_cancel_button_->setVisible(false);
+
         m_back_button_->setVisible(true);
-        m_back_button_->setEnabled(WizardNavigation::canGoBack(m_state_));
-        m_next_button_->setText(QStringLiteral("Установить"));
-        m_next_button_->setEnabled(WizardNavigation::canGoNext(m_state_));
+        m_back_button_->setEnabled(true);
+
+        m_next_button_->setVisible(false);
+
+        m_install_button_->setVisible(true);
+        m_install_button_->setEnabled(true);
+
+        m_finish_button_->setVisible(true);
+        m_finish_button_->setEnabled(m_is_any_installed_);
+
+
+
+        m_cancel_button_->setEnabled(m_is_any_installed_);
+
+
         break;
     }
 }
@@ -141,6 +190,17 @@ void MainWindow::setButtonsEnabled(bool enabled)
 void MainWindow::onInstallationStarted(const PackageDescriptor& pkg)
 {
     qDebug() << "Установка начата для пакета:" << pkg.id;
+
+    m_install_in_progress_ = true;
+    setButtonsEnabled(false);
+
+    // Лог + прогресс на экране выбора пакета
+    if (m_selection_widget_) {
+        m_selection_widget_->clearLog();
+        m_selection_widget_->setProgressValue(0);
+        m_selection_widget_->appendLogLine(
+            QStringLiteral("Установка пакета '%1' начата...").arg(pkg.displayName));
+    }
 }
 
 void MainWindow::onInstallationFinished(const PackageDescriptor& pkg, bool success, const QString& errorMessage)
@@ -149,9 +209,19 @@ void MainWindow::onInstallationFinished(const PackageDescriptor& pkg, bool succe
     m_install_in_progress_ = false;
     setButtonsEnabled(true);
 
+    if (m_selection_widget_) {
+        m_selection_widget_->setProgressValue(success ? 100 : 0);
+    }
+
     if (success) {
         QMessageBox::information(this, QStringLiteral("Установка"),
                                  QStringLiteral("Пакет успешно установлен."));
+
+        m_is_any_installed_ = true;
+        if (m_state_ == WizardState::SelectPackage) {
+            m_back_button_->setEnabled(false);
+            m_finish_button_->setEnabled(true);
+        }
     } else {
         QMessageBox::critical(this, QStringLiteral("Установка"),
                               QStringLiteral("Ошибка установки:\n%1")
@@ -162,4 +232,7 @@ void MainWindow::onInstallationFinished(const PackageDescriptor& pkg, bool succe
 void MainWindow::onInstallationOutput(const QString& line)
 {
     qDebug() << "OUTPUT:" << line;
+    if (m_selection_widget_) {
+        m_selection_widget_->appendLogLine(line);
+    }
 }

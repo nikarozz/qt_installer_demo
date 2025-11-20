@@ -6,7 +6,7 @@ std::vector<PackageDescriptor> PackageRepository::availablePackages()
 
     pkgs.push_back(PackageDescriptor{
         QStringLiteral("greetings"),
-        QStringLiteral("greetings"),
+        QStringLiteral("Greetings"),
         QStringLiteral("Small self-assembled deb package - greetings"),
         QStringList{QStringLiteral(":/packages/greetings.deb")},
         PackageType::Deb

@@ -39,8 +39,12 @@ private:
     QStackedWidget* m_stack_;
     QPushButton* m_back_button_;
     QPushButton* m_next_button_;
+    QPushButton* m_cancel_button_;
+    QPushButton* m_install_button_;
+    QPushButton* m_finish_button_;
 
     std::vector<PackageDescriptor> m_packages_;
     InstallerService* m_installer_;
     bool m_install_in_progress_ = false;
+    bool m_is_any_installed_ = false;
 };
