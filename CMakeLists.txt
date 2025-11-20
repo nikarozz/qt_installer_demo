@@ -11,6 +11,8 @@ set(CMAKE_AUTOUIC OFF)
 
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
 
+option(ENABLE_TESTS "Build tests" ON)
+
 set(INSTALLER_LIB_SOURCES
     src/main_window.cpp
     src/intro_widget.cpp
@@ -48,3 +50,8 @@ target_link_libraries(installer_app
         Qt5::Core
         Qt5::Widgets
 )
+
+if(ENABLE_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
